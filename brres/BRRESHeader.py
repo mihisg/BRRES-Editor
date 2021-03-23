@@ -1,5 +1,6 @@
 from struct import Struct
 
+
 class BRRESHeader:
     """
     Class for the header of a brres archive

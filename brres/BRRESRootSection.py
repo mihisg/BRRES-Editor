@@ -1,10 +1,11 @@
-from struct import Struct
 from brres.BRRESIndexGroup import *
+
 
 class BRRESRootSection:
     """
     Class for the root section of a brres archive
     """
+
     def __init__(self):
         self.tag = 0
         self.size = 0
@@ -12,7 +13,6 @@ class BRRESRootSection:
         self.first_group = BRRESIndexGroup()
 
         self.subGroups = []
-
 
     def unpack(self, data):
         rootUnpacker = Struct("> 4s I")

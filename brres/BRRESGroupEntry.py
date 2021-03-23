@@ -1,5 +1,5 @@
-from binascii import hexlify
 from struct import Struct
+
 
 class BRRESGroupEntry:
     """
@@ -7,7 +7,6 @@ class BRRESGroupEntry:
     """
 
     def __init__(self):
-
         self.id = 0
         self.unknown = 0
         self.left_index = 0
@@ -29,3 +28,6 @@ class BRRESGroupEntry:
 
         print(
             f"BRRESGroupEntry -- id={self.id}, zero={self.unknown}, leftIndex={self.left_index}, rightIndex={self.right_index}, nameOffset=0x{self.name_offset:04X}, name={self.name}, dataOffset=0x{self.data_offset:04X}")
+
+    def pack(self):
+        pass

@@ -1,5 +1,6 @@
-from brres.BRRESGroupEntry import *
 from struct import Struct
+
+from brres.BRRESGroupEntry import *
 
 
 class BRRESIndexGroup:
@@ -35,6 +36,4 @@ class BRRESIndexGroup:
             print(f"New entry with name {newEntry.name}")
 
     def pack(self):
-        groupHeaderPacker = Struct("> I I")
-        data = []
-        data.append()
+        pass
