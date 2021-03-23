@@ -82,59 +82,6 @@ class SubSection:
         print(self.header.sectionOffsets)
         print(self.header.stringOffset)
 
-        """elif header.versionNum == 2:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x14:0x18]))
-            elif header.versionNum == 3:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))
-            elif header.versionNum == 4:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))
-            elif header.versionNum == 5:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))
-            elif header.versionNum == 8:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))
-            elif header.versionNum == 11:
-                headerUnpacker2 = Struct("> I")
-                header.sectionOffsets.append(headerUnpacker2.unpack(data[0x10:0x14]))"""
-        # else:
-        # ValueError("The section number does not equal the common values 1, 2 or 3")
-
-
 def _pack(self):
     pass
 
-
-"""def notifyRename(self, oldName):
-    if self.observers:
-        for o in self.observers:
-            o.onRenameUpdate(self, oldName)
-    self.notifyParentObservers()"""
-
-"""def notifyParentObservers(self):
-    parent = self.parent
-    if parent and parent.observers:
-        for o in parent.observers:
-            o.onChildUpdate()"""
-
-"""def registerObserver(self, observer):
-    if self.observers is None:
-        self.observers = [observer]
-    elif observer not in self.observers:
-        self.observers.append(observer)"""
-
-"""def unregister(self, observer):
-    try:
-        self.observers.remove(observer)
-    except ValueError as e:
-        print(f"Could not remove observer {observer} because it is not contained in the list: {e} ")"""
-
-"""def notifyObservers(self):
-    if self.observers:
-        for o in self.observers:
-            o.onNodeUpdate()
-    self.notifyParentObservers()"""
