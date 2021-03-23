@@ -1,4 +1,5 @@
 from subSections.SubSection import SubSection
+from struct import Struct
 
 class Tex0(SubSection):
     """
@@ -19,7 +20,7 @@ class Tex0(SubSection):
         self.scaling_rule = 0
 
     def unpack(self, data):
-        pass
+        super()._unpack(data, {1: 1, 2: 2, 3: 1})
 
     def pack(self):
         pass

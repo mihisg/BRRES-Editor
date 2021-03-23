@@ -14,7 +14,7 @@ class Mdl0(SubSection):
         self.scaling_rule = 0
 
     def unpack(self, data):
-        pass
+        super()._unpack(data, {8: 11, 11: 14})
 
     def pack(self):
         pass
