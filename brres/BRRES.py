@@ -1,5 +1,4 @@
 from brres.BRRESHeader import *
-from brres.BRRESIndexGroup import *
 from brres.BRRESRootSection import *
 from subSections.Chr0 import Chr0
 from subSections.Clr0 import Clr0
@@ -30,31 +29,40 @@ class BRRES:
         self.zeroes = []
 
     def unpack(self, data):
-        headerData = data[0:0x10]
-        self.header.unpack(headerData)
+        self.unpackHeader(data[0:0x10])
+        self.unpackRoot(data[0x10:])
+
+        offsetToFirstSubSection = self.weirdZeroes(data)
+        self.generateFoldersAndFiles()
+
+        self.unpackSubSections(data, offsetToFirstSubSection + 0x10)
+
+    def unpackHeader(self, data):
+        self.header.unpack(data)
         if self.header.tag != self.TAG:
             TypeError("This is no .brres file! Please try again. No data was changed")
 
-        rootData = data[0x10:]
-        self.root.unpack(rootData)
+    def unpackRoot(self, data):
+        self.root.unpack(data)
 
+    def weirdZeroes(self, data):
         offsetToFirstSubSection = 0x0
-        zero = Struct(">s").unpack(data[
-                                   0x10 + self.root.size + offsetToFirstSubSection: 0x10 + self.root.size + 0x1 + offsetToFirstSubSection])
+        zero = Struct(">s").unpack(data[0x10 + self.root.size + offsetToFirstSubSection: 0x10 + self.root.size + 0x1 + offsetToFirstSubSection])
         while zero == (b'\x00',):
             self.zeroes.append(zero)
             offsetToFirstSubSection += 1
             test = Struct(">s")
-            zero = test.unpack(data[
-                               0x10 + self.root.size + offsetToFirstSubSection: 0x10 + self.root.size + 0x1 + offsetToFirstSubSection])
+            zero = test.unpack(data[0x10 + self.root.size + offsetToFirstSubSection: 0x10 + self.root.size + 0x1 + offsetToFirstSubSection])
+        return offsetToFirstSubSection
 
+    def generateFoldersAndFiles(self):
         for entry in range(0, self.root.first_group.n_entries):
             files = []
             for i in self.root.subGroups[entry].brres_entries:
                 files.append(i.name)
             self.folders[self.root.first_group.brres_entries[entry].name] = files
 
-        offsetToSubSection = offsetToFirstSubSection + 0x10
+    def unpackSubSections(self, data, offsetToSubSection):
         counters = [0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(1, self.header.n_sections):
             nameUnpacker = Struct("> 4s ")
@@ -109,6 +117,7 @@ class BRRES:
 
             offsetToSubSection += length[0]
 
+    # TODO
     def pack(self):
         data = []
         data.append(self.header.pack())
