@@ -1,5 +1,9 @@
 from subSections.SubSection import SubSection
 from struct import Struct
+try:
+    from PyQt5 import QtGui.QPixmap
+except ImportError:
+    from PySide2 import QtGui.QPixmap
 
 class Tex0(SubSection):
     """
@@ -24,3 +28,107 @@ class Tex0(SubSection):
 
     def pack(self):
         pass
+
+
+
+
+
+RGB4A3LUT = []
+RGB4A3LUT_NoAlpha = []
+def PrepareRGB4A3LUTs():
+    global RGB4A3LUT, RGB4A3LUT_NoAlpha
+
+    RGB4A3LUT = [None] * 0x10000
+    RGB4A3LUT_NoAlpha = [None] * 0x10000
+    for LUT, hasA in [(RGB4A3LUT, True), (RGB4A3LUT_NoAlpha, False)]:
+
+        # RGB4A3
+        for d in range(0x8000):
+            if hasA:
+                alpha = d >> 12
+                alpha = alpha << 5 | alpha << 2 | alpha >> 1
+            else:
+                alpha = 0xFF
+            red = ((d >> 8) & 0xF) * 17
+            green = ((d >> 4) & 0xF) * 17
+            blue = (d & 0xF) * 17
+            LUT[d] = blue | (green << 8) | (red << 16) | (alpha << 24)
+
+        # RGB555
+        for d in range(0x8000):
+            red = d >> 10
+            red = red << 3 | red >> 2
+            green = (d >> 5) & 0x1F
+            green = green << 3 | green >> 2
+            blue = d & 0x1F
+            blue = blue << 3 | blue >> 2
+            LUT[d + 0x8000] = blue | (green << 8) | (red << 16) | 0xFF000000
+
+PrepareRGB4A3LUTs()
+
+
+
+def RGB4A3Encode(tex):
+    shorts = []
+    colorCache = {}
+    for ytile in range(0, 256, 4):
+        for xtile in range(0, 1024, 4):
+            for ypixel in range(ytile, ytile + 4):
+                for xpixel in range(xtile, xtile + 4):
+
+                    if xpixel >= 1024 or ypixel >= 256:
+                        continue
+
+                    pixel = tex.pixel(xpixel, ypixel)
+
+                    if pixel in colorCache:
+                        rgba = colorCache[pixel]
+
+                    else:
+
+                        a = pixel >> 24
+                        r = (pixel >> 16) & 0xFF
+                        g = (pixel >> 8) & 0xFF
+                        b = pixel & 0xFF
+
+                        # See encodingTests.py for verification that these
+                        # channel conversion formulas are 100% correct
+
+                        # It'd be nice if we could do
+                        # if a < 19:
+                        #     rgba = 0
+                        # for speed, but that defeats the purpose of the
+                        # "Toggle Alpha" setting.
+
+                        if a < 238: # RGB4A3
+                            alpha = ((a + 18) << 1) // 73
+                            red = (r + 8) // 17
+                            green = (g + 8) // 17
+                            blue = (b + 8) // 17
+
+                            # 0aaarrrrggggbbbb
+                            rgba = blue | (green << 4) | (red << 8) | (alpha << 12)
+
+                        else: # RGB555
+                            red = ((r + 4) << 2) // 33
+                            green = ((g + 4) << 2) // 33
+                            blue = ((b + 4) << 2) // 33
+
+                            # 1rrrrrgggggbbbbb
+                            rgba = blue | (green << 5) | (red << 10) | (0x8000)
+
+                        colorCache[pixel] = rgba
+
+                    shorts.append(rgba)
+
+                    if xtile % 32 == 0 or xtile % 32 == 28:
+                        shorts.append(rgba)
+                        shorts.append(rgba)
+                        shorts.append(rgba)
+                        break
+                if ytile % 32 == 0 or ytile % 32 == 28:
+                    shorts.extend(shorts[-4:])
+                    shorts.extend(shorts[-8:])
+                    break
+
+    return struct.pack('>262144H', *shorts)
