@@ -1,9 +1,9 @@
 from subSections.SubSection import SubSection
 from struct import Struct
 try:
-    from PyQt5 import QtGui.QImage
+    from PyQt5.QtGui import QImage
 except ImportError:
-    from PySide2 import QtGui.QImage
+    from PySide2.QtGui import QImage
 
 class Tex0(SubSection):
     """
