@@ -1,9 +1,9 @@
 from subSections.SubSection import SubSection
 from struct import Struct
 try:
-    from PyQt5 import QtGui.QPixmap
+    from PyQt5 import QtGui.QImage
 except ImportError:
-    from PySide2 import QtGui.QPixmap
+    from PySide2 import QtGui.QImage
 
 class Tex0(SubSection):
     """
@@ -66,6 +66,55 @@ def PrepareRGB4A3LUTs():
 
 PrepareRGB4A3LUTs()
 
+def RGB4A3Decode(tex, useAlpha=True):
+    tx = 0; ty = 0
+    iter = tex.__iter__()
+    dest = [0] * 262144
+
+    LUT = RGB4A3LUT if useAlpha else RGB4A3LUT_NoAlpha
+
+    # Loop over all texels (of which there are 16384)
+    for i in range(16384):
+        temp1 = (i // 256) % 8
+        if temp1 == 0 or temp1 == 7:
+            # Skip every row of texels that is a multiple of 8 or (a
+            # multiple of 8) - 1
+            # Unrolled loop for performance.
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+            next(iter); next(iter); next(iter); next(iter)
+        else:
+            temp2 = i % 8
+            if temp2 == 0 or temp2 == 7:
+                # Skip every column of texels that is a multiple of 8
+                # or (a multiple of 8) - 1
+                # Unrolled loop for performance.
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+                next(iter); next(iter); next(iter); next(iter)
+            else:
+                # Actually render this texel
+                for y in range(ty, ty+4):
+                    for x in range(tx, tx+4):
+                        dest[x + y * 1024] = LUT[next(iter) << 8 | next(iter)]
+
+        # Move on to the next texel
+        tx += 4
+        if tx >= 1024: tx = 0; ty += 4
+
+    # Convert the list of ARGB color values into a bytes object, and
+    # then convert that into a QImage
+    return QImage(struct.pack('<262144I', *dest), 1024, 256, QImage.Format_ARGB32)
 
 
 def RGB4A3Encode(tex):
