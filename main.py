@@ -1,5 +1,5 @@
 from brres.BRRES import *
-from brres.BRRESModel import BRRESTreeView
+from brres.BRRESTreeView import BRRESTreeView
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 
