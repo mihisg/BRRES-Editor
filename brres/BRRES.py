@@ -14,7 +14,6 @@ class BRRES:
     TAG = b'bres'
 
     def __init__(self):
-
         self.header = BRRESHeader()
         self.root = BRRESRootSection()
         self.folders = {}
