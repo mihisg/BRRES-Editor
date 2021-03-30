@@ -3,8 +3,8 @@ from struct import Struct
 
 
 class Mdl0(SubSection):
-    TAG = 'CHR0'
-    EXTENSION = 'chr0'
+    TAG = 'MDL0'
+    EXTENSION = 'mdl0'
 
     def __init__(self, name, parent):
         super(Mdl0, self).__init__(name, parent)

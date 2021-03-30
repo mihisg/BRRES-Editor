@@ -29,7 +29,12 @@
 ################################################################
 ################################################################
 
-
+"""
+Not working:
+I4 wrong -> purple instead of grey?
+IA8 wrong -> way to bright
+RGB5A3 -> upper row is cut off at some parts
+"""
 
 class Decoder():
     """
