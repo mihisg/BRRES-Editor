@@ -678,14 +678,16 @@ class RGBA8Decoder(Decoder):
                 except IndexError: continue
 
                 j = 0
-                for ypixel in range(ytile, ytile+4):
-                    for xpixel in range(xtile, xtile+4):
-                        red, green, blue, alpha = R[j], G[j], B[j], A[j]
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = blue
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = red
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
-                        j += 1
+                try:
+                    for ypixel in range(ytile, ytile+4):
+                        for xpixel in range(xtile, xtile+4):
+                            red, green, blue, alpha = R[j], G[j], B[j], A[j]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = blue
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = red
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                            j += 1
+                except IndexError: continue
 
             newProgress = (ytile / h) - self.progress
             if newProgress > self.updateInterval and self.updater:

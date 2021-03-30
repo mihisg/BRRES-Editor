@@ -1,10 +1,27 @@
 from subSections.SubSection import SubSection
 from subSections.TPLLib import *
 from struct import Struct
-try:
-    from PyQt5.QtGui import QImage
-except ImportError:
-    from PySide2.QtGui import QImage
+from PyQt5.QtGui import QImage
+
+class Tex0Header:
+    def __init__(self):
+        self.unk0 = 0
+        self.width = 0
+        self.height = 0
+        self.format = 0
+        self.numberOfImages = 0
+        self.unk1 = 0
+        self.numberOfMipmaps = 0 #(numberOfImages -1)
+        self.unk2 = 0
+        
+    def unpack(self, data):
+        self.unk0, self.width, self.height, self.format, self.numberOfImages, self.unk1, self.numberOfMipmaps, self.unk2 = Struct(">IHHIIIII").unpack(data)
+        print("width: {}\nheight: {}\nformat: {}\nnumberOfImages: {}\n".format(self.width, self.height, self.format, self.numberOfImages))
+        
+    def pack(self, *args):
+        pass
+
+
 
 class Tex0(SubSection):
     """
@@ -19,10 +36,7 @@ class Tex0(SubSection):
 
     def __init__(self, name, parent):
         super(Tex0, self).__init__(name, parent)
-        self.animations = []
-        self.framecount = 1
-        self.loop = True
-        self.scaling_rule = 0
+        self.images = []
 
     def unpack(self, data):
         name = Struct(">4s").unpack(data[:4])[0]
@@ -30,19 +44,42 @@ class Tex0(SubSection):
         version = Struct(">I").unpack(data[8:12])[0]
         offsetToBress = Struct(">i").unpack(data[12:16])[0]
         if version == 1 or version == 3:
-            n = 1
             sectionOffset = Struct(">I").unpack(data[16:20])[0]
-        elif version == 2:
-            n = 2
+            header = Tex0Header()
+            header.unpack(data[0x18:0x34])
+            
+            decoder = getDecoder(header.format)
+            decoder = decoder(data[sectionOffset:], header.width, header.height)
+            newdata = decoder.run()
+            img = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
+        
+            self.images.append(img)
+        
+        elif version == 2:                                                                                              #Untested❗️
             sectionOffset, sectionOffset2 = Struct(">II").unpack(data[16:24])
+            header = Tex0Header()
+            header.unpack(data[0x1C:0x38])
+            
+            decoder = decoder(data[sectionOffset:], header.width, header.height)
+            newdata = decoder.run()
+            img = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
+            
+            header2 = Tex0Header()
+            header2.unpack(data[0x38:0x54])
+            
+            decoder = decoder(data[sectionOffset2:], header2.width, header2.height)
+            newdata = decoder.run()
+            img2 = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
+            
+            self.images.extend([img, img2])
+        
         else:
             raise ValueError('Unrecognized version')
-        print("\nname: {}\nlength: {}\nversion: {}\noffsetToBrres: {}\n".format(name, length, version, offsetToBress))
+        
+        print("\nname: {}\nlength: {}\nversion: {}\noffsetToBrres: {}\nsectionOffset: {}\n".format(name, length, version, offsetToBress, sectionOffset))
+        
+        
         
 
     def pack(self):
         pass
-
-
-
-

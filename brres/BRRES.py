@@ -117,6 +117,7 @@ class BRRES:
 
             offsetToSubSection += length
 
+
     # TODO
     def pack(self):
         data = []
@@ -127,3 +128,10 @@ class BRRES:
             pass  # pack all sections
 
         return data
+
+
+    def saveAllImagesAsPng(self):
+        for key, value in self.tex0.items():
+            for i in range(0, len(value.images)):
+                value.images[i].save("{} {}.png".format(key, i))
+
