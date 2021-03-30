@@ -72,45 +72,46 @@ class BRRES:
                 data[self.root.size + offsetToSubSection + 0x4:self.root.size + 0x8 + offsetToSubSection])
             if name == (b'MDL0',):
                 subfile = Mdl0(self.folders["3DModels(NW4R)"][counters[0]], self.folders["3DModels(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length]) #@Mihi is this actually correct? Can't check it right now 😅😜
                 self.mdl0[subfile.name] = subfile
                 counters[0] += 1
             elif name == (b'CHR0',):
                 subfile = Chr0(self.folders["AnmChr(NW4R)"][counters[1]], self.folders["AnmChr(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.chr0[subfile.name] = subfile
                 counters[1] += 1
             elif name == (b'CLR0',):
                 subfile = Clr0(self.folders["AnmClr(NW4R)"][counters[2]], self.folders["AnmClr(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.clr0[subfile.name] = subfile
                 counters[2] += 1
             elif name == (b'PAT0',):
                 subfile = Pat0(self.folders["AnmTexPat(NW4R)"][counters[2]], self.folders["AnmTexPat(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.pat0[subfile.name] = subfile
                 counters[3] += 1
             elif name == (b'SCN0',):
                 subfile = Scn0(self.folders["AnmScn(NW4R)"][counters[2]], self.folders["AnmScn(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.scn0[subfile.name] = subfile
                 counters[4] += 1
             elif name == (b'SHP0',):
                 subfile = Shp0(self.folders["AnmShp(NW4R)"][counters[2]], self.folders["AnmShp(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.shp0[subfile.name] = subfile
                 counters[5] += 1
             elif name == (b'SRT0',):
                 subfile = Srt0(self.folders["AnmTexSrt(NW4R)"][counters[2]], self.folders["AnmTexSrt(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.srt0[subfile.name] = subfile
                 counters[6] += 1
             elif name == (b'TEX0',):
                 subfile = Tex0(self.folders["Textures(NW4R)"][counters[7]], self.folders["Textures(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.tex0[subfile.name] = subfile
                 counters[7] += 1
             else:
+                #subfile = Unk0(...)
                 TypeError(f"[ERROR]: This format is an unknown subfile and not supported: {name}")
                 return
 
