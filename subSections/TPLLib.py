@@ -1,11 +1,8 @@
-#!/usr/bin/python
-# -*- coding: latin-1 -*-
-
 # TPLLib - A Python library for decoding and encoding Nintendo image formats
-# Version 0.1
-# Copyright (C) 2009-2014 Tempus, RoadrunnerWMC
+# Version 0.2
+# Copyright (C) 2009-2014 Tempus, RoadrunnerWMC, 2021 Nin0
 
-# This file is part of TPLLib.
+# This file was part of TPLLib.
 
 # TPLLib is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,19 +19,9 @@
 
 
 
-# backend_python.py
-# Image encoding/decoding classes using pure-Python as a backend
-
-
 ################################################################
 ################################################################
 
-"""
-Not working:
-I4 wrong -> black row
-IA8 wrong -> way to bright
-RGB5A3 -> bottom row is cut off at some parts
-"""
 
 class Decoder():
     """
@@ -78,7 +65,6 @@ class Encoder():
         Runs the algorithm
         """
         raise NotImplementedError('You cannot run an abstract encoder')
-
 
 
 class I4Decoder(Decoder):
@@ -524,9 +510,9 @@ class RGB565Encoder(Encoder):
         return self.result
 
 
-class RGB4A3Decoder(Decoder):
+class RGB5A3Decoder(Decoder):
     """
-    Decodes an RGB4A3 texture
+    Decodes an RGB5A3 texture
     """
     # Formats:
     # 1BBBBBGG GGGRRRRR
@@ -560,7 +546,7 @@ class RGB4A3Decoder(Decoder):
                                 red = red5 << 3 | red5 >> 2
                                 alpha = 0xFF
 
-                            else: # RGB4A3
+                            else: # RGB5A3
                                 alpha3 = newpixel >> 12
                                 blue4 = (newpixel >> 8) & 0xF
                                 green4 = (newpixel >> 4) & 0xF
@@ -586,9 +572,9 @@ class RGB4A3Decoder(Decoder):
         return self.result
 
 
-class RGB4A3Encoder(Encoder):
+class RGB5A3Encoder(Encoder):
     """
-    Encodes an RGB4A3 texture
+    Encodes an RGB5A3 texture
     """
     # Formats:
     # 1BBBBBGG GGGRRRRR
@@ -611,7 +597,7 @@ class RGB4A3Encoder(Encoder):
                         newpixelG = argb[(((ypixel * w) + xpixel) * 4) + 1]
                         newpixelR = argb[(((ypixel * w) + xpixel) * 4) + 2]
                         newpixelA = argb[(((ypixel * w) + xpixel) * 4) + 3]
-                        if newpixelA < 238: # RGB4A3
+                        if newpixelA < 238: # RGB5A3
                             alpha3 = ((newpixelA + 18) << 1) // 73
                             red4 = (newpixelR + 8) // 17
                             green4 = (newpixelG + 8) // 17
@@ -740,7 +726,7 @@ I8 = 1
 IA4 = 2
 IA8 = 3
 RGB565 = 4
-RGB4A3 = 5
+RGB5A3 = 5
 RGBA8 = 6
 CI4 = 8
 CI8 = 9
@@ -766,8 +752,8 @@ def getDecoder(type):
         return IA8Decoder
     elif type == RGB565:
         return RGB565Decoder
-    elif type == RGB4A3:
-        return RGB4A3Decoder
+    elif type == RGB5A3:
+        return RGB5A3Decoder
     elif type == RGBA8:
         return RGBA8Decoder
     elif type == CI4:
@@ -799,8 +785,8 @@ def getEncoder(type):
         return IA8Encoder
     elif type == RGB565:
         return RGB565Encoder
-    elif type == RGB4A3:
-        return RGB4A3Encoder
+    elif type == RGB5A3:
+        return RGB5A3Encoder
     elif type == RGBA8:
         return RGBA8Encoder
     elif type == CI4:

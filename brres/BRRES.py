@@ -102,7 +102,7 @@ class BRRES:
                 counters[6] += 1
             elif name == b'TEX0':
                 subfile = Tex0(self.folders["Textures(NW4R)"][counters[7]], self.folders["Textures(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.tex0[subfile.name] = subfile
                 counters[7] += 1
             elif name == b'PLT0':
