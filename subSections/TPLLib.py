@@ -31,9 +31,9 @@
 
 """
 Not working:
-I4 wrong -> purple instead of grey?
+I4 wrong -> black row
 IA8 wrong -> way to bright
-RGB5A3 -> upper row is cut off at some parts
+RGB5A3 -> bottom row is cut off at some parts
 """
 
 class Decoder():
@@ -107,17 +107,17 @@ class I4Decoder(Decoder):
 
                         newpixel = (tex[i] >> 4) * 17 # upper nybble
 
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = 0xFF
+                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = newpixel
                         argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
                         argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = newpixel
+                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = 0xFF
 
                         newpixel = (tex[i] & 0xF) * 17 # lower nybble
 
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 4] = 0xFF
+                        argbBuf[(((ypixel * w) + xpixel) * 4) + 4] = newpixel
                         argbBuf[(((ypixel * w) + xpixel) * 4) + 5] = newpixel
                         argbBuf[(((ypixel * w) + xpixel) * 4) + 6] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = newpixel
+                        argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = 0xFF
 
                         i += 1
 
