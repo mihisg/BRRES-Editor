@@ -42,7 +42,7 @@ class Tex0(SubSection):
     def unpack(self, data):
         super().unpackSubSectionHeader(data)
         subHeader = Tex0Header()
-        subHeader.unpack(data[0x18:0x34])
+        subHeader.unpack(data[0x14+self.header.n*4:0x30+self.header.n*4])
         for offset in self.header.sectionOffsets:
             decoder = getDecoder(subHeader.format)
             decoder = decoder(data[offset:], subHeader.width, subHeader.height)

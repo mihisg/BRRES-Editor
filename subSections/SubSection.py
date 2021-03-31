@@ -13,6 +13,7 @@ class SubSection:
             self.outerOffset = 0
             self.sectionOffsets = []
             self.stringOffset = 0
+            self.n = 0
 
 
     def __init__(self, name, parent):
@@ -31,6 +32,8 @@ class SubSection:
             header.sectionOffsets.append(Struct(">I").unpack(data[0x10 + i*4:0x14 + i*4])[0])
         
         if not n == 0: header.stringOffset = Struct(">I").unpack(data[0x10 + 4*n:0x14 + 4*n])[0]
+        
+        header.n = n
         
         self.header = header
 
