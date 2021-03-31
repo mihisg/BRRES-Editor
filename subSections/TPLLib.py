@@ -95,30 +95,27 @@ class I4Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 8):
             for xtile in range(0, w, 8):
                 for ypixel in range(ytile, ytile + 8):
                     for xpixel in range(xtile, xtile + 8, 2):
+                        try:
+                            newpixel = (tex[i] >> 4) * 0x11 # upper nybble
 
-                        if xpixel >= w or ypixel >= h:
-                            continue
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = 0xFF
 
-                        newpixel = (tex[i] >> 4) * 17 # upper nybble
+                            newpixel = (tex[i] & 0xF) * 0x11 # lower nybble
 
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = 0xFF
-
-                        newpixel = (tex[i] & 0xF) * 17 # lower nybble
-
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 4] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 5] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 6] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = 0xFF
-
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 4] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 5] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 6] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = 0xFF
+                        except IndexError: continue
                         i += 1
 
             newProgress = (ytile / h) - self.progress
@@ -281,24 +278,21 @@ class IA4Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 4):
             for xtile in range(0, w, 8):
                 for ypixel in range(ytile, ytile + 4):
                     for xpixel in range(xtile, xtile + 8):
+                        try:
+                            alpha = (tex[i] >> 4) * 0x11
+                            newpixel = (tex[i] & 0xF) * 0x11
 
-                        if xpixel >= w or ypixel >= h:
-                            continue
-
-                        alpha = (tex[i] >> 4) * 17
-                        newpixel = (tex[i] & 0xF) * 17
-
-                        argbBuf[((ypixel * w) + xpixel) * 4] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
-
+                            argbBuf[((ypixel * w) + xpixel) * 4] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                        except IndexError: continue
                         i += 1
 
             newProgress = (ytile / h) - self.progress
@@ -366,26 +360,23 @@ class IA8Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 4):
             for xtile in range(0, w, 4):
                 for ypixel in range(ytile, ytile + 4):
                     for xpixel in range(xtile, xtile + 4):
-
-                        if xpixel >= w or ypixel >= h:
-                            continue
-
-                        newpixel = tex[i]
-                        i += 1
-
-                        alpha = tex[i]
-                        i += 1
-
-                        argbBuf[((ypixel * w) + xpixel) * 4] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                        try:
+                            alpha = tex[i]
+                        
+                            newpixel = tex[i+1]
+                        
+                            argbBuf[((ypixel * w) + xpixel) * 4] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                        except IndexError: continue
+                        i += 2
 
             newProgress = (ytile / h) - self.progress
             if newProgress > self.updateInterval and self.updater:
@@ -453,33 +444,30 @@ class RGB565Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 4):
             for xtile in range(0, w, 4):
                 for ypixel in range(ytile, ytile + 4):
                     for xpixel in range(xtile, xtile + 4):
+                        try:
+                            blue5 = tex[i + 1] & 0x1F
+                            blue = blue5 << 3 | blue5 >> 2
 
-                        if xpixel >= w or ypixel >= h:
-                            continue
+                            greenB = (tex[i + 1] >> 5)
+                            greenT = (tex[i] & 0x7)
+                            green = greenT << 5 | greenB << 2 | greenT >> 1
 
-                        blue5 = tex[i + 1] & 0x1F
-                        blue = blue5 << 3 | blue5 >> 2
+                            red5 = tex[i] >> 3
+                            red = red5 << 3 | red5 >> 2
 
-                        greenB = (tex[i + 1] >> 5)
-                        greenT = (tex[i] & 0x7)
-                        green = greenT << 5 | greenB << 2 | greenT >> 1
+                            alpha = 0xFF
 
-                        red5 = tex[i] >> 3
-                        red = red5 << 3 | red5 >> 2
-
-                        alpha = 0xFF
-
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = blue
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = red
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
-
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = blue
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = red
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                        except IndexError: continue
                         i += 2
 
             newProgress = (ytile / h) - self.progress
@@ -551,44 +539,42 @@ class RGB4A3Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 4):
             for xtile in range(0, w, 4):
                 for ypixel in range(ytile, ytile + 4):
                     for xpixel in range(xtile, xtile + 4):
+                        try:
 
-                        if xpixel >= w or ypixel >= h:
-                            continue
-
-                        newpixel = (tex[i] << 8) | tex[i+1]
-                        newpixel = int(newpixel)
+                            newpixel = (tex[i] << 8) | tex[i+1]
+                            newpixel = int(newpixel)
 
 
-                        if newpixel & 0x8000: # RGB555
-                            blue5 = (newpixel >> 10) & 0x1F
-                            green5 = (newpixel >> 5) & 0x1F
-                            red5 = newpixel & 0x1F
-                            blue = blue5 << 3 | blue5 >> 2
-                            green = green5 << 3 | green5 >> 2
-                            red = red5 << 3 | red5 >> 2
-                            alpha = 0xFF
+                            if newpixel & 0x8000: # RGB555
+                                blue5 = (newpixel >> 10) & 0x1F
+                                green5 = (newpixel >> 5) & 0x1F
+                                red5 = newpixel & 0x1F
+                                blue = blue5 << 3 | blue5 >> 2
+                                green = green5 << 3 | green5 >> 2
+                                red = red5 << 3 | red5 >> 2
+                                alpha = 0xFF
 
-                        else: # RGB4A3
-                            alpha3 = newpixel >> 12
-                            blue4 = (newpixel >> 8) & 0xF
-                            green4 = (newpixel >> 4) & 0xF
-                            red4 = newpixel & 0xF
-                            alpha = (alpha3 << 5) | (alpha3 << 2) | (alpha3 >> 1)
-                            blue = blue4 * 17
-                            green = green4 * 17
-                            red = red4 * 17
+                            else: # RGB4A3
+                                alpha3 = newpixel >> 12
+                                blue4 = (newpixel >> 8) & 0xF
+                                green4 = (newpixel >> 4) & 0xF
+                                red4 = newpixel & 0xF
+                                alpha = (alpha3 << 5) | (alpha3 << 2) | (alpha3 >> 1)
+                                blue = blue4 * 17
+                                green = green4 * 17
+                                red = red4 * 17
 
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = red
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = blue
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
-
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = red
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = green
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = blue
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
+                        except IndexError: continue
                         i += 2
 
             newProgress = (ytile / h) - self.progress
