@@ -8,6 +8,7 @@ from subSections.Scn0 import Scn0
 from subSections.Shp0 import Shp0
 from subSections.Srt0 import Srt0
 from subSections.Tex0 import Tex0
+from subSections.Plt0 import Plt0
 
 
 class BRRES:
@@ -19,6 +20,7 @@ class BRRES:
         self.folders = {}
         self.mdl0 = {}
         self.tex0 = {}
+        self.plt0 = {}
         self.srt0 = {}
         self.chr0 = {}
         self.pat0 = {}
@@ -55,7 +57,7 @@ class BRRES:
             self.folders[self.root.first_group.brres_entries[entry].name] = files
 
     def unpackSubSections(self, data, offsetToSubSection):
-        counters = [0, 0, 0, 0, 0, 0, 0, 0]
+        counters = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(1, self.header.n_sections):
             name = Struct(">4s").unpack(
                 data[self.root.size + offsetToSubSection:self.root.size + 0x4 + offsetToSubSection])[0]
@@ -101,6 +103,11 @@ class BRRES:
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.tex0[subfile.name] = subfile
                 counters[7] += 1
+            elif name == b'PLT0':
+                subfile = Plt0(self.folders["Palettes(NW4R)"][counters[8]], self.folders["Palettes(NW4R)"])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                self.plt0[subfile.name] = subfile
+                counters[8] += 1
             else:
                 #subfile = Unk0(...)
                 raise TypeError(f"[ERROR]: This format is an unknown subfile and not supported: {name}")

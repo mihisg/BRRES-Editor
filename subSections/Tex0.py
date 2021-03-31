@@ -16,7 +16,7 @@ class Tex0Header:
         
     def unpack(self, data):
         self.unk0, self.width, self.height, self.format, self.numberOfImages, self.unk1, self.numberOfMipmaps, self.unk2 = Struct(">IHHIIIII").unpack(data)
-        print("width: {}\nheight: {}\nformat: {}\nnumberOfImages: {}\n".format(self.width, self.height, self.format, self.numberOfImages))
+        #print("width: {}\nheight: {}\nformat: {}\nnumberOfImages: {}\n".format(self.width, self.height, self.format, self.numberOfImages))
         
     def pack(self, *args):
         pass
