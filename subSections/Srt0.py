@@ -14,7 +14,7 @@ class Srt0(SubSection):
         self.scaling_rule = 0
 
     def unpack(self, data):
-        super()._unpack(data, {4: 1, 5: 2})
+        pass
 
     def pack(self):
         pass

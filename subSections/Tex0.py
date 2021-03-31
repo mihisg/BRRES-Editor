@@ -38,49 +38,19 @@ class Tex0(SubSection):
         super(Tex0, self).__init__(name, parent)
         self.images = []
 
+
     def unpack(self, data):
-        name = Struct(">4s").unpack(data[:4])[0]
-        length = Struct(">I").unpack(data[4:8])[0]
-        version = Struct(">I").unpack(data[8:12])[0]
-        offsetToBress = Struct(">i").unpack(data[12:16])[0]     #this is a negative value
-        if version == 1 or version == 3:
-            sectionOffset = Struct(">I").unpack(data[16:20])[0]
-            header = Tex0Header()
-            header.unpack(data[0x18:0x34])
-            
-            decoder = getDecoder(header.format)
-            decoder = decoder(data[sectionOffset:], header.width, header.height)
+        super().unpackSubSectionHeader(data)
+        subHeader = Tex0Header()
+        subHeader.unpack(data[0x18:0x34])
+        for offset in self.header.sectionOffsets:
+            decoder = getDecoder(subHeader.format)
+            decoder = decoder(data[offset:], subHeader.width, subHeader.height)
             newdata = decoder.run()
-            img = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
+            img = QImage(newdata, subHeader.width, subHeader.height, 4 * subHeader.width, QImage.Format_ARGB32)
         
             self.images.append(img)
-        
-        elif version == 2:                                                                                              #Untested❗️
-            sectionOffset, sectionOffset2 = Struct(">II").unpack(data[16:24])
-            header = Tex0Header()
-            header.unpack(data[0x1C:0x38])
 
-            decoder = getDecoder(header.format)
-            decoder = decoder(data[sectionOffset:], header.width, header.height)
-            newdata = decoder.run()
-            img = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
-            
-            header2 = Tex0Header()
-            header2.unpack(data[0x38:0x54])
-            
-            decoder = decoder(data[sectionOffset2:], header2.width, header2.height)
-            newdata = decoder.run()
-            img2 = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)
-            
-            self.images.extend([img, img2])
-        
-        else:
-            raise ValueError('Unrecognized version')
-        
-        print("\nname: {}\nlength: {}\nversion: {}\noffsetToBrres: {}\nsectionOffset: {}\n".format(name, length, version, offsetToBress, sectionOffset))
-        
-        
-        
 
     def pack(self):
         pass

@@ -9,6 +9,7 @@ from subSections.Shp0 import Shp0
 from subSections.Srt0 import Srt0
 from subSections.Tex0 import Tex0
 from subSections.Plt0 import Plt0
+from subSections.Unk0 import Unk0
 
 
 class BRRES:
@@ -27,6 +28,7 @@ class BRRES:
         self.clr0 = {}
         self.shp0 = {}
         self.scn0 = {}
+        self.unk0 = {}
         self.zeroes = 0
 
     def unpack(self, data):
@@ -57,7 +59,7 @@ class BRRES:
             self.folders[self.root.first_group.brres_entries[entry].name] = files
 
     def unpackSubSections(self, data, offsetToSubSection):
-        counters = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        counters = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(1, self.header.n_sections):
             name = Struct(">4s").unpack(
                 data[self.root.size + offsetToSubSection:self.root.size + 0x4 + offsetToSubSection])[0]
@@ -108,9 +110,12 @@ class BRRES:
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.plt0[subfile.name] = subfile
                 counters[8] += 1
-            else:
-                #subfile = Unk0(...)
-                raise TypeError(f"[ERROR]: This format is an unknown subfile and not supported: {name}")
+            else:                   #insert other subfiles before this one - also in the counters list!
+                subfile = Unk0(self.folders["Unknown(NW4R)"][counters[-1]], self.folders["Unknown(NW4R)"])
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                self.unk0[subfile.name] = subfile
+                counters[-1] += 1
+                
 
             offsetToSubSection += length
 
