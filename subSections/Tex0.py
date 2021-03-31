@@ -32,7 +32,7 @@ class Tex0(SubSection):
     EXTENSION = 'tex0'
     FORMATS = {0: 'I4', 1: 'I8', 2: 'IA4', 3: 'IA8',
                4: 'RGB565', 5: 'RGB5A3', 6: 'RGBA32',
-               8: 'C4', 9: 'C8', 10: 'C14X2', 14: 'CMPR'}
+               8: 'C4', 9: 'C8', 10: 'C14X2', 14: 'CMPR'}     #is C14X2 really needed -> BrawlCrate doesn't contain it
 
     def __init__(self, name, parent):
         super(Tex0, self).__init__(name, parent)
@@ -42,7 +42,7 @@ class Tex0(SubSection):
         name = Struct(">4s").unpack(data[:4])[0]
         length = Struct(">I").unpack(data[4:8])[0]
         version = Struct(">I").unpack(data[8:12])[0]
-        offsetToBress = Struct(">i").unpack(data[12:16])[0]
+        offsetToBress = Struct(">i").unpack(data[12:16])[0]     #this is a negative value
         if version == 1 or version == 3:
             sectionOffset = Struct(">I").unpack(data[16:20])[0]
             header = Tex0Header()
@@ -59,7 +59,8 @@ class Tex0(SubSection):
             sectionOffset, sectionOffset2 = Struct(">II").unpack(data[16:24])
             header = Tex0Header()
             header.unpack(data[0x1C:0x38])
-            
+
+            decoder = getDecoder(header.format)
             decoder = decoder(data[sectionOffset:], header.width, header.height)
             newdata = decoder.run()
             img = QImage(newdata, header.width, header.height, 4 * header.width, QImage.Format_ARGB32)

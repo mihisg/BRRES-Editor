@@ -1,17 +1,5 @@
 from struct import Struct
 
-"""class Observer:
-    def onNodeUpdate(self, node):
-        pass
-
-    def onRenameUpadte(self, node):
-        pass
-
-    def onChildUpdate(self, node):
-        pass
-"""
-
-
 class SubSection:
     """
         Represents a brres-subsection, base class for mdl0, tex0, ...
@@ -41,26 +29,6 @@ class SubSection:
         self.header = SubSection.SubSectionHeader()
         self.isModified = False
 
-    def rename(self, name):
-        if name != self.name:
-            oldName = self.name
-            self.name = name
-            self.markModified(False)
-            # self.notifyRename(oldName)
-            return True
-        return False
-
-    def markModified(self, notifyObservers=True):
-        if notifyObservers:
-            pass  # self.notifyObservers()
-        if not self.isModified:
-            self.isModified = True
-            if self.parent:
-                self.parent.markModified(False)
-
-    def markUnmodified(self):
-        self.isModified = False
-
     def _unpack(self, data, section_table):
         header = SubSection.SubSectionHeader()
         header.tag, header.size, header.versionNum, header.outerOffset = Struct("> 4s I I I").unpack(data[0x0:0x10])
@@ -82,6 +50,6 @@ class SubSection:
         print(self.header.sectionOffsets)
         print(self.header.stringOffset)
 
-def _pack(self):
-    pass
+    def _pack(self):
+        pass
 

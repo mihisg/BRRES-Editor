@@ -25,30 +25,24 @@ class BRRES:
         self.clr0 = {}
         self.shp0 = {}
         self.scn0 = {}
-        self.zeroes = []
+        self.zeroes = 0
 
     def unpack(self, data):
-        self.unpackHeader(data[0:0x10])
-        self.unpackRoot(data[0x10:])
+        self.header.unpack(data[0:0x10])
+        if self.header.tag != self.TAG:
+            TypeError("This is no .brres file! Please try again. No data was changed")
+        self.root.unpack(data[0x10:])
 
         offsetToFirstSubSection = self.weirdZeroes(data)
         self.generateFoldersAndFiles()
 
         self.unpackSubSections(data, offsetToFirstSubSection + 0x10)
 
-    def unpackHeader(self, data):
-        self.header.unpack(data)
-        if self.header.tag != self.TAG:
-            TypeError("This is no .brres file! Please try again. No data was changed")
-
-    def unpackRoot(self, data):
-        self.root.unpack(data)
-
     def weirdZeroes(self, data):
         offsetToFirstSubSection = 0x0
         zero = Struct(">s").unpack(data[0x10 + self.root.size + offsetToFirstSubSection:0x10 + self.root.size + 0x1 + offsetToFirstSubSection])[0]
         while zero == b'\x00':
-            self.zeroes.append(zero)
+            self.zeroes += 1
             offsetToFirstSubSection += 1
             zero = Struct(">s").unpack(data[0x10 + self.root.size + offsetToFirstSubSection:0x10 + self.root.size + 0x1 + offsetToFirstSubSection])[0]
         return offsetToFirstSubSection
@@ -63,15 +57,13 @@ class BRRES:
     def unpackSubSections(self, data, offsetToSubSection):
         counters = [0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(1, self.header.n_sections):
-            nameUnpacker = Struct(">4s")
-            lengthUnpacker = Struct(">I")
-            name = nameUnpacker.unpack(
+            name = Struct(">4s").unpack(
                 data[self.root.size + offsetToSubSection:self.root.size + 0x4 + offsetToSubSection])[0]
-            length = lengthUnpacker.unpack(
+            length = Struct(">I").unpack(
                 data[self.root.size + offsetToSubSection + 0x4:self.root.size + 0x8 + offsetToSubSection])[0]
             if name == b'MDL0':
                 subfile = Mdl0(self.folders["3DModels(NW4R)"][counters[0]], self.folders["3DModels(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length]) #@Mihi is this actually correct? Can't check it right now 😅😜
+                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])  # @Mihi is this actually correct? Can't check it right now 😅😜
                 self.mdl0[subfile.name] = subfile
                 counters[0] += 1
             elif name == b'CHR0':
@@ -112,8 +104,6 @@ class BRRES:
             else:
                 #subfile = Unk0(...)
                 raise TypeError(f"[ERROR]: This format is an unknown subfile and not supported: {name}")
-                return
-                
 
             offsetToSubSection += length
 

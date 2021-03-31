@@ -3,8 +3,8 @@ from struct import Struct
 
 
 class Shp0(SubSection):
-    TAG = 'CHR0'
-    EXTENSION = 'chr0'
+    TAG = 'SHP0'
+    EXTENSION = 'shp0'
 
     def __init__(self, name, parent):
         super(Shp0, self).__init__(name, parent)
