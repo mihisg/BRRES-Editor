@@ -103,11 +103,15 @@ class BRRES:
             elif name == b'TEX0':
                 subfile = Tex0(self.folders["Textures(NW4R)"][counters[7]], self.folders["Textures(NW4R)"])
                 #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                subfile.readStart = self.root.size + offsetToSubSection
+                subfile.readEnd = self.root.size + offsetToSubSection + length
                 self.tex0[subfile.name] = subfile
                 counters[7] += 1
             elif name == b'PLT0':
                 subfile = Plt0(self.folders["Palettes(NW4R)"][counters[8]], self.folders["Palettes(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                subfile.readStart = self.root.size + offsetToSubSection
+                subfile.readEnd = self.root.size + offsetToSubSection + length
                 self.plt0[subfile.name] = subfile
                 counters[8] += 1
             else:                   #insert other subfiles before this one - also in the counters list!
@@ -116,8 +120,19 @@ class BRRES:
                 self.unk0[subfile.name] = subfile
                 counters[-1] += 1
                 
-
+                
             offsetToSubSection += length
+            
+        for name, subfile in self.plt0.items():                     #unpack Plt0
+            subfile.unpack(data[subfile.readStart:subfile.readEnd])
+
+        for name, subfile in self.tex0.items():                     #unpack Tex0
+            if name in self.plt0:
+                print(self.plt0[name].palette)
+                subfile.unpack(data[subfile.readStart:subfile.readEnd], self.plt0[name].palette)
+            else:
+                subfile.unpack(data[subfile.readStart:subfile.readEnd])
+
 
 
     # TODO

@@ -1,10 +1,10 @@
 from struct import Struct
 
+
 class SubSection:
     """
     Represents a brres-subsection, base class for mdl0, tex0, ...
     """
-
     class SubSectionHeader:
         def __init__(self):
             self.magic = 0
@@ -22,6 +22,9 @@ class SubSection:
         self.observers = []
         self.header = SubSection.SubSectionHeader()
         self.isModified = False
+        self.readStart = 0
+        self.readEnd = 0
+
 
     def unpackSubSectionHeader(self, data):
         header = SubSection.SubSectionHeader()
@@ -43,6 +46,7 @@ class SubSection:
         #print(self.header.outerOffset)
         #print(self.header.sectionOffsets)
         #print(self.header.stringOffset)
+
 
     def getNumberOfSections(self, magic, version):
         if magic == b'CHR0':

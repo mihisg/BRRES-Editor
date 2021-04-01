@@ -39,13 +39,13 @@ class Tex0(SubSection):
         self.images = []
 
 
-    def unpack(self, data):
+    def unpack(self, data, palette = []):
         super().unpackSubSectionHeader(data)
         subHeader = Tex0Header()
         subHeader.unpack(data[0x14+self.header.n*4:0x30+self.header.n*4])
         for offset in self.header.sectionOffsets:
             decoder = getDecoder(subHeader.format)
-            decoder = decoder(data[offset:], subHeader.width, subHeader.height)
+            decoder = decoder(data[offset:], subHeader.width, subHeader.height, palette)
             newdata = decoder.run()
             img = QImage(newdata, subHeader.width, subHeader.height, 4 * subHeader.width, QImage.Format_ARGB32)
         

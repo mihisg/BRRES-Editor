@@ -27,16 +27,15 @@ class Decoder():
     """
     Object that decodes a texture
     """
-    def __init__(self, tex, width, height, updater=None, updateInterval=0.1):
+    def __init__(self, tex, width, height, palette):
         """
         Initializes the decoder
         """
         self.tex = tex
         self.size = [width, height]
-        self.updater = updater
-        self.updateInterval = updateInterval
-        self.progress = 0
+        self.palette = palette
         self.result = None
+
 
     def run(self):
         """
@@ -49,15 +48,12 @@ class Encoder():
     """
     Object that encodes a texture
     """
-    def __init__(self, argb, width, height, updater=None, updateInterval=0.1):
+    def __init__(self, argb, width, height):
         """
         Initializes the encoder
         """
         self.argb = argb
         self.size = [width, height]
-        self.updater = updater
-        self.updateInterval = updateInterval
-        self.progress = 0
         self.result = None
 
     def run(self):
@@ -103,11 +99,6 @@ class I4Decoder(Decoder):
                             argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = 0xFF
                         except IndexError: continue
                         i += 1
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(argbBuf)
         return self.result
@@ -157,11 +148,6 @@ class I4Encoder(Encoder):
 
                         i += 1
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(texBuf)
         return self.result
 
@@ -180,29 +166,21 @@ class I8Decoder(Decoder):
         """
         tex, w, h = self.tex, self.size[0], self.size[1]
 
-        argbBuf = bytearray(w * h * 4)
+        argbBuf = bytearray((w+4) * (h+4) * 4)
         i = 0
         for ytile in range(0, h, 4):
             for xtile in range(0, w, 8):
                 for ypixel in range(ytile, ytile + 4):
                     for xpixel in range(xtile, xtile + 8):
+                        try:
+                            newpixel = tex[i]
 
-                        if xpixel >= w or ypixel >= h:
-                            continue
-
-                        newpixel = tex[i]
-
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
-                        argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = 0xFF
-
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = newpixel
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = 0xFF
+                        except IndexError: continue
                         i += 1
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(argbBuf)
         return self.result
@@ -241,11 +219,6 @@ class I8Encoder(Encoder):
 
                         i += 1
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(texBuf)
         return self.result
 
@@ -280,11 +253,6 @@ class IA4Decoder(Decoder):
                             argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
                         except IndexError: continue
                         i += 1
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(argbBuf)
         return self.result
@@ -323,11 +291,6 @@ class IA4Encoder(Encoder):
 
                         i += 1
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(texBuf)
         return self.result
 
@@ -363,11 +326,6 @@ class IA8Decoder(Decoder):
                             argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = alpha
                         except IndexError: continue
                         i += 2
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(argbBuf)
         return self.result
@@ -406,11 +364,6 @@ class IA8Encoder(Encoder):
                         i += 1
                         texBuf[i] = newpixelA
                         i += 1
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(texBuf)
         return self.result
@@ -456,11 +409,6 @@ class RGB565Decoder(Decoder):
                         except IndexError: continue
                         i += 2
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(argbBuf)
         return self.result
 
@@ -500,11 +448,6 @@ class RGB565Encoder(Encoder):
                         texBuf[i] = newpixel >> 8
                         texBuf[i + 1] = newpixel & 0xFF
                         i += 2
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(texBuf)
         return self.result
@@ -563,11 +506,6 @@ class RGB5A3Decoder(Decoder):
                         except IndexError: continue
                         i += 2
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(argbBuf)
         return self.result
 
@@ -611,11 +549,6 @@ class RGB5A3Encoder(Encoder):
                         texBuf[i] = newpixel >> 8
                         texBuf[i + 1] = newpixel & 0xFF
                         i += 2
-
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
 
         self.result = bytes(texBuf)
         return self.result
@@ -666,11 +599,6 @@ class RGBA8Decoder(Decoder):
                             j += 1
                 except IndexError: continue
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(argbBuf)
         return self.result
 
@@ -711,12 +639,76 @@ class RGBA8Encoder(Encoder):
                         texBuf[i] = newpixelB
                         i += 1
 
-            newProgress = (ytile / h) - self.progress
-            if newProgress > self.updateInterval and self.updater:
-                self.progress += self.updateInterval
-                self.updater()
-
         self.result = bytes(texBuf)
+        return self.result
+
+
+class CI4Decoder(Decoder):
+    """
+    Decodes a CI4 texture
+    """
+    def run(self):
+        """
+        Runs the algorithm
+        """
+        if not self.palette: raise TypeError("Palette for decoding seems to be missing!")
+        tex, w, h = self.tex, self.size[0], self.size[1]
+
+        argbBuf = bytearray((w+4) * (h+4) * 4)
+        i = 0
+        for ytile in range(0, h, 8):
+            for xtile in range(0, w, 8):
+                for ypixel in range(ytile, ytile + 8):
+                    for xpixel in range(xtile, xtile + 8, 2):
+                        try:
+                            index = (tex[i] >> 4) # upper nybble
+
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = self.palette[index][0]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = self.palette[index][1]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = self.palette[index][2]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = self.palette[index][3]
+
+                            index = (tex[i] & 0xF) # lower nybble
+
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 4] = self.palette[index][0]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 5] = self.palette[index][1]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 6] = self.palette[index][2]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 7] = self.palette[index][3]
+                        except IndexError: continue
+                        i += 1
+
+        self.result = bytes(argbBuf)
+        return self.result
+
+
+class CI8Decoder(Decoder):
+    """
+    Decodes a CI8 texture
+    """
+    def run(self):
+        """
+        Runs the algorithm
+        """
+        if not self.palette: raise TypeError("Palette for decoding seems to be missing!")
+        tex, w, h = self.tex, self.size[0], self.size[1]
+
+        argbBuf = bytearray((w+4) * (h+4) * 4)
+        i = 0
+        for ytile in range(0, h, 4):
+            for xtile in range(0, w, 8):
+                for ypixel in range(ytile, ytile + 4):
+                    for xpixel in range(xtile, xtile + 8):
+                        try:
+                            index = tex[i]
+
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 0] = self.palette[index][0]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 1] = self.palette[index][1]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 2] = self.palette[index][2]
+                            argbBuf[(((ypixel * w) + xpixel) * 4) + 3] = self.palette[index][3]
+                        except IndexError: continue
+                        i += 1
+
+        self.result = bytes(argbBuf)
         return self.result
 
 
@@ -757,9 +749,9 @@ def getDecoder(type):
     elif type == RGBA8:
         return RGBA8Decoder
     elif type == CI4:
-        raise ValueError('CI4 is not supported')
+        return CI4Decoder #raise ValueError('CI4 is not supported')
     elif type == CI8:
-        raise ValueError('CI8 is not supported')
+        return CI8Decoder #raise ValueError('CI8 is not supported')
     elif type == CI14x2:
         raise ValueError('CI14x2 is not supported')
     elif type == CMPR:
