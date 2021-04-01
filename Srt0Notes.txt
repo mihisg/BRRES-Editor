@@ -1,0 +1,27 @@
+00 01 00 00  00 00 00 00  00 00 00 00  00 16 00 00  00 00 00 01  00 00 00 EC  00 00 00 28
+00 01 00 00  00 00 00 00  00 00 00 00  00 16 00 00  00 00 00 01  00 00 00 F4  00 00 00 28
+00 01 00 00  00 00 00 00  00 00 00 00  00 16 00 00  00 00 00 01  00 00 00 DC  00 00 00 28
+-offset(?)-     -unk-        -unk-        -unk-        -unk-     -textures.-  -indirects-
+-> 0x0C+M*4
+-->    0x10
+
+
+
+
+
+
+public SRT0v4(ushort frames, bool loop, ushort entries, int matrixMode)
+{
+	_header._tag = Tag;
+	_header._size = Size;
+	_header._version = 4;
+	_header._bresOffset = 0;
+
+	_dataOffset = Size;
+	_origPathOffset = 0;
+	_matrixMode = matrixMode;
+	_numFrames = frames;
+	_loop = loop ? 1 : 0;
+	_stringOffset = 0;
+	_numEntries = entries;
+}

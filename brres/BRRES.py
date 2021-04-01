@@ -128,7 +128,7 @@ class BRRES:
 
         for name, subfile in self.tex0.items():                     #unpack Tex0
             if name in self.plt0:
-                print(self.plt0[name].palette)
+                #print(self.plt0[name].palette)
                 subfile.unpack(data[subfile.readStart:subfile.readEnd], self.plt0[name].palette)
             else:
                 subfile.unpack(data[subfile.readStart:subfile.readEnd])

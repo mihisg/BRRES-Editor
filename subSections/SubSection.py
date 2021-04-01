@@ -62,7 +62,7 @@ class SubSection:
         
         elif magic == b'PAT0':
             if version == 4: return 6
-            
+            print(version)
         elif magic == b'SCN0':
             if version == 4: return 6
             elif version == 5: return 7
