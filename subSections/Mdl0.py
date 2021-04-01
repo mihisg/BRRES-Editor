@@ -21,13 +21,31 @@ class Mdl0Header:
         self.bones = 0
         self.unk3 = 0x01000000
         self.boneTableOffset = 0
-        selt.min = Vec3D()
+        self.min = Vec3D()
         self.max = Vec3D()
         
     def unpack(self, data):
-        self.headerLength, self.headerOffset, self.unk0, self.unk1, self.vertices, self.faces, self.unk2, self.bones, self.unk3, self.boneTableOffset = Struct(">IIIIIIIIII").unpack(data)
-        self.min.x, self.min.y, self.min.z, self.max.x, self.max.y, self.max.z = Struct(">ffffff").unpack(data[0x28:])
-        
+        self.headerLength, self.headerOffset, self.unk0, self.unk1, self.vertices, self.faces, self.unk2, self.bones, self.unk3, self.boneTableOffset = Struct(">IIIIIIIIII").unpack(data[:0x28])
+        self.min.x, self.min.y, self.min.z, self.max.x, self.max.y, self.max.z = Struct(">ffffff").unpack(data[0x28:0x40])
+        """
+        print(self.headerLength)
+        print(self.headerOffset)
+        print(self.unk0)
+        print(self.unk1)
+        print(self.vertices)
+        print(self.faces)
+        print(self.unk2)
+        print(self.bones)
+        print(self.unk3)
+        print(self.boneTableOffset)
+        print(self.min.x)
+        print(self.min.y)
+        print(self.min.z)
+        print(self.max.x)
+        print(self.max.y)
+        print(self.max.z)
+        """
+
     def pack(self, *args):
         pass
 
@@ -44,7 +62,9 @@ class Mdl0(SubSection):
         self.scaling_rule = 0
 
     def unpack(self, data):
-        pass
+        super().unpackSubSectionHeader(data)
+        subHeader = Mdl0Header()
+        subHeader.unpack(data[0x14 + self.header.n * 4:0x54 + self.header.n * 4])
 
     def pack(self):
         pass

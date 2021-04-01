@@ -97,7 +97,7 @@ class BRRES:
                 counters[5] += 1
             elif name == b'SRT0':
                 subfile = Srt0(self.folders["AnmTexSrt(NW4R)"][counters[2]], self.folders["AnmTexSrt(NW4R)"])
-                subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
+                subfile.unpack(data[self.root.size + offsetToSubSection:])  #self.root.size + offsetToSubSection + length  ->  @Nin0 this doesn't work since the string table at the end has to be accessed
                 self.srt0[subfile.name] = subfile
                 counters[6] += 1
             elif name == b'TEX0':
