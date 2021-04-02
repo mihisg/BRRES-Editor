@@ -41,16 +41,14 @@ class KeyFrameList:
         self.frames = []
 
     def unpack(self, data):
-        #self.frameCount = Struct(">H").unpack(data[:2])
-        print(len(data[0:8]))
         self.frameCount, self.unknown, self.frameScale = Struct(">HHf").unpack(data[0:8])
-        for i in range(1):
+        for i in range(self.frameCount):
             tangent, value, index = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
             self.frames.append([tangent, value, index])
-        print(self.frameCount)
-        print(self.unknown)
-        print(self.frameScale)
-        print(self.frames)
+        print(f"KeyFrameList frameCount: {self.frameCount}")
+        print(f"KeyFrameList unknown: {self.unknown}")
+        print(f"KeyFrameList frameScale: {self.frameScale}")
+        print(f"KeyFrameList frames: {self.frames}")
 
 class Srt0TextureEntry:
     def __init__(self):
@@ -92,7 +90,6 @@ class Srt0TextureEntry:
         self.unknown = code
 
     def unpackKeyFrameList(self, data):
-        print(data)
         newList = KeyFrameList()
         newList.unpack(data)
         return newList
@@ -153,12 +150,8 @@ class Srt0TextureEntry:
                 xTrans = Struct(">f").unpack(data[:0x4])[0]
                 self.xTranslation.append(xTrans)
             else:
-                print("test2")
-                print(data)
                 transPointer = Struct(">I").unpack(data[:0x4])[0]
-                print(transPointer)
                 keyFrameList = self.unpackKeyFrameList(data[transPointer:])
-                print(data[transPointer:])
                 self.xTranslation.append(keyFrameList)
             if self.yTranslationFixed:
                 yTrans = Struct(">f").unpack(data[0x4:0x8])[0]
@@ -172,29 +165,26 @@ class Srt0TextureEntry:
         self.animationTypeCode = Struct(">I").unpack(data[:0x4])[0]
         self.parseAnimationCode(self.animationTypeCode)
         scaleOffset = self.unpackScale(data[0x4:])
-        print("test")
-        print(data)
-        rotationOffset = self.unpackRotation(data[scaleOffset:])
-        print(rotationOffset)
-        self.unpackTranslation(data[rotationOffset:])
+        rotationOffset = self.unpackRotation(data[0x4 + scaleOffset:])
+        self.unpackTranslation(data[0x4 + scaleOffset + rotationOffset:])
 
-        print(self.animationTypeCode)
-        print(self.unknownBit)
-        print(self.scaleDefault)
-        print(self.rotationDefault)
-        print(self.translationDefault)
-        print(self.scaleIsotropic)
-        print(self.xScaleFixed)
-        print(self.yScaleFixed)
-        print(self.rotationFixed)
-        print(self.xTranslationFixed)
-        print(self.yTranslationFixed)
-        print(self.unknown)
-        print(self.xScale)
-        print(self.yScale)
-        print(self.rotation)
-        print(self.xTranslation)
-        print(self.yTranslation)
+        print(f"Texture Entry animationCode: {self.animationTypeCode}")
+        print(f"Texture Entry unknownBit: {self.unknownBit}")
+        print(f"Texture Entry scaleDefault: {self.scaleDefault}")
+        print(f"Texture Entry rotationDefault: {self.rotationDefault}")
+        print(f"Texture Entry translationDefault: {self.translationDefault}")
+        print(f"Texture Entry scaleIsotropic: {self.scaleIsotropic}")
+        print(f"Texture Entry xScaleFixed: {self.xScaleFixed}")
+        print(f"Texture Entry yScaleFixed: {self.yScaleFixed}")
+        print(f"Texture Entry rotationFixed: {self.rotationFixed}")
+        print(f"Texture Entry xTranslationFixed: {self.xTranslationFixed}")
+        print(f"Texture Entry yTranslationFixed: {self.yTranslationFixed}")
+        print(f"Texture Entry unknown: {self.unknown}")
+        print(f"Texture Entry xScale: {self.xScale}")
+        print(f"Texture Entry yScale: {self.yScale}")
+        print(f"Texture Entry rotation: {self.rotation}")
+        print(f"Texture Entry xTranslation: {self.xTranslation}")
+        print(f"Texture Entry yTranslation: {self.yTranslation}")
 
     def pack(self):
         pass
@@ -236,23 +226,13 @@ class Srt0Material:
                 count += 1
             bit <<= 1
 
-        for i in range(3):
-            if bit & self.w:
-                self.texEnabled[i] = True
-                self.entryOffsets.append(Struct(">I").unpack(data[0x0C + count * 4:0x10 + count * 4])[0])
-                entry = Srt0TextureEntry()
-                entry.unpack(data[self.entryOffsets[count]:])
-                self.entries.append(entry)
-                count += 1
-            bit <<= 1
-
-        print(self.nameOffset)
-        print(self.name)
-        print(self.m)
-        print(self.w)
-        print(self.entryOffsets)
-        print(self.entries)
-        print(self.texEnabled)
+        print(f"Material name offset: ${self.nameOffset}")
+        print(f"Material name: ${self.name}")
+        print(f"Material texture count: ${self.m}")
+        print(f"Material ind texture count: ${self.w}")
+        print(f"Material entry offsets: ${self.entryOffsets}")
+        print(f"Material entries: ${self.entries}")
+        print(f"Material texEnabled: ${self.texEnabled}")
 
     def pack(self, *args):
         pass
