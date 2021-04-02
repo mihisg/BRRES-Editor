@@ -19,7 +19,7 @@ class Srt0Header:
         pass
 
 
-# Enums for Srt0
+# What sorcery is this?
 Texture0 = 0x01
 Texture1 = 0x02
 Texture2 = 0x04
@@ -32,6 +32,24 @@ Texture7 = 0x80
 Indirect0 = 0x01
 Indirect1 = 0x02
 Indirect2 = 0x04
+
+class KeyFrameList:
+    def __init__(self):
+        self.frameCount = 0
+        self.unknown = 0
+        self.frameScale = 0.0
+        self.frames = []
+
+    def unpack(self, data):
+        self.frameCount = Struct(">H").unpack(data[:2])
+        self.frameCount, self.unknown, self.frameScale = Struct("> HHf").unpack(data[0:8])[0]
+        for i in range(1):
+            tangent, value, index = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
+            self.frames.append([tangent, value, index])
+        print(self.frameCount)
+        print(self.unknown)
+        print(self.frameScale)
+        print(self.frames)
 
 class Srt0TextureEntry:
     def __init__(self):
@@ -72,21 +90,11 @@ class Srt0TextureEntry:
         self.yTranslationFixed = flags[8]
         self.unknown = code
 
-        print(self.animationTypeCode)
-        print(self.unknown)
-        print(self.unknownBit)
-        print(self.scaleDefault)
-        print(self.rotationDefault)
-        print(self.translationDefault)
-        print(self.scaleIsotropic)
-        print(self.xScaleFixed)
-        print(self.yScaleFixed)
-        print(self.rotationFixed)
-        print(self.xTranslationFixed)
-        print(self.yTranslationFixed)
-
     def unpackKeyFrameList(self, data):
-        pass
+        print(data)
+        newList = KeyFrameList()
+        newList.unpack(data)
+        return newList
 
     def unpackScale(self, data):
         if self.scaleDefault:
@@ -99,7 +107,7 @@ class Srt0TextureEntry:
                 self.xScale.append(scale)
                 self.yScale.append(scale)
             else:
-                scalePointer = Struct("> f").unpack(data[:0x4])[0]
+                scalePointer = Struct("> I").unpack(data[:0x4])[0]
                 keyFrameList = self.unpackKeyFrameList(data[scalePointer:])
                 self.xScale.append(keyFrameList)
                 self.yScale.append(keyFrameList)
@@ -109,14 +117,14 @@ class Srt0TextureEntry:
                 scale = Struct("> f").unpack(data[:0x4])[0]
                 self.xScale.append(scale)
             else:
-                scalePointer = Struct("> f").unpack(data[:0x4])[0]
+                scalePointer = Struct("> I").unpack(data[:0x4])[0]
                 keyFrameList = self.unpackKeyFrameList(data[scalePointer:])
                 self.xScale.append(keyFrameList)
             if self.yScaleFixed:
                 scale = Struct("> f").unpack(data[0x4:0x8])[0]
                 self.yScale.append(scale)
             else:
-                scalePointer = Struct("> f").unpack(data[0x4:0x8])[0]
+                scalePointer = Struct("> I").unpack(data[0x4:0x8])[0]
                 keyFrameList = self.unpackKeyFrameList(data[scalePointer:])
                 self.yScale.append(keyFrameList)
             return 0x8
@@ -124,10 +132,10 @@ class Srt0TextureEntry:
     def unpackRotation(self, data):
         if not self.rotationDefault:
             if self.rotationFixed:
-                rot = Struct("> f").unpack(data[:0x4])
+                rot = Struct("> f").unpack(data[:0x4])[0]
                 self.rotation.append(rot)
             else:
-                rotPointer = Struct("> f").unpack(data[0x4])[0]
+                rotPointer = Struct("> I").unpack(data[0x4])[0]
                 keyFrameList = self.unpackKeyFrameList(data[rotPointer:])
                 self.yScale.append(keyFrameList)
             return 0x4
@@ -136,7 +144,24 @@ class Srt0TextureEntry:
             return 0x0
 
     def unpackTranslation(self, data):
-        pass
+        if self.translationDefault:
+            self.xTranslation.append(0.0)
+            self.yTranslation.append(0.0)
+        else:
+            if self.xTranslationFixed:
+                xTrans = Struct("> f").unpack(data[:0x4])[0]
+                self.xTranslation.append(xTrans)
+            else:
+                transPointer = Struct("> I").unpack(data[:0x4])[0]
+                keyFrameList = self.unpackKeyFrameList(data[transPointer:])
+                self.xTranslation.append(keyFrameList)
+            if self.yTranslationFixed:
+                yTrans = Struct("> f").unpack(data[0x4:0x8])[0]
+                self.yTranslation.append(yTrans)
+            else:
+                transPointer = Struct("> I").unpack(data[0x4:0x8])[0]
+                keyFrameList = self.unpackKeyFrameList(data[transPointer:])
+                self.yTranslation.append(keyFrameList)
 
     def unpack(self, data):
         self.animationTypeCode = Struct(">I").unpack(data[:0x4])[0]
@@ -144,6 +169,24 @@ class Srt0TextureEntry:
         scaleOffset = self.unpackScale(data[0x4:])
         rotationOffset = self.unpackRotation(data[scaleOffset:])
         self.unpackTranslation(data[rotationOffset:])
+
+        print(self.animationTypeCode)
+        print(self.unknownBit)
+        print(self.scaleDefault)
+        print(self.rotationDefault)
+        print(self.translationDefault)
+        print(self.scaleIsotropic)
+        print(self.xScaleFixed)
+        print(self.yScaleFixed)
+        print(self.rotationFixed)
+        print(self.xTranslationFixed)
+        print(self.yTranslationFixed)
+        print(self.unknown)
+        print(self.xScale)
+        print(self.yScale)
+        print(self.rotation)
+        print(self.xTranslation)
+        print(self.yTranslation)
 
     def pack(self):
         pass
@@ -180,6 +223,7 @@ class Srt0Material:
         print(self.unk0)
         print(self.entryOffsets)
         print(self.entries)
+        print(self.texEnabled)
 
     def pack(self, *args):
         pass
@@ -221,10 +265,6 @@ class Srt0(SubSection):
         self.subHeader = None
         self.section0 = None
         self.section1 = None
-        self.matAnimations = []
-        self.framecount = 1
-        self.loop = True
-        self.scaling_rule = 0
 
     def unpack(self, data):
         super().unpackSubSectionHeader(data)
