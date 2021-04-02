@@ -19,7 +19,7 @@ class Srt0Header:
         pass
 
 
-# What sorcery is this?
+# enums for direct and indirect textures
 Texture0 = 0x01
 Texture1 = 0x02
 Texture2 = 0x04
@@ -41,8 +41,9 @@ class KeyFrameList:
         self.frames = []
 
     def unpack(self, data):
-        self.frameCount = Struct(">H").unpack(data[:2])
-        self.frameCount, self.unknown, self.frameScale = Struct("> HHf").unpack(data[0:8])[0]
+        #self.frameCount = Struct(">H").unpack(data[:2])
+        print(len(data[0:8]))
+        self.frameCount, self.unknown, self.frameScale = Struct(">HHf").unpack(data[0:8])
         for i in range(1):
             tangent, value, index = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
             self.frames.append([tangent, value, index])
@@ -132,10 +133,10 @@ class Srt0TextureEntry:
     def unpackRotation(self, data):
         if not self.rotationDefault:
             if self.rotationFixed:
-                rot = Struct("> f").unpack(data[:0x4])[0]
+                rot = Struct(">f").unpack(data[:0x4])[0]
                 self.rotation.append(rot)
             else:
-                rotPointer = Struct("> I").unpack(data[0x4])[0]
+                rotPointer = Struct(">I").unpack(data[:0x4])[0]
                 keyFrameList = self.unpackKeyFrameList(data[rotPointer:])
                 self.yScale.append(keyFrameList)
             return 0x4
@@ -149,17 +150,21 @@ class Srt0TextureEntry:
             self.yTranslation.append(0.0)
         else:
             if self.xTranslationFixed:
-                xTrans = Struct("> f").unpack(data[:0x4])[0]
+                xTrans = Struct(">f").unpack(data[:0x4])[0]
                 self.xTranslation.append(xTrans)
             else:
-                transPointer = Struct("> I").unpack(data[:0x4])[0]
+                print("test2")
+                print(data)
+                transPointer = Struct(">I").unpack(data[:0x4])[0]
+                print(transPointer)
                 keyFrameList = self.unpackKeyFrameList(data[transPointer:])
+                print(data[transPointer:])
                 self.xTranslation.append(keyFrameList)
             if self.yTranslationFixed:
-                yTrans = Struct("> f").unpack(data[0x4:0x8])[0]
+                yTrans = Struct(">f").unpack(data[0x4:0x8])[0]
                 self.yTranslation.append(yTrans)
             else:
-                transPointer = Struct("> I").unpack(data[0x4:0x8])[0]
+                transPointer = Struct(">I").unpack(data[0x4:0x8])[0]
                 keyFrameList = self.unpackKeyFrameList(data[transPointer:])
                 self.yTranslation.append(keyFrameList)
 
@@ -167,7 +172,10 @@ class Srt0TextureEntry:
         self.animationTypeCode = Struct(">I").unpack(data[:0x4])[0]
         self.parseAnimationCode(self.animationTypeCode)
         scaleOffset = self.unpackScale(data[0x4:])
+        print("test")
+        print(data)
         rotationOffset = self.unpackRotation(data[scaleOffset:])
+        print(rotationOffset)
         self.unpackTranslation(data[rotationOffset:])
 
         print(self.animationTypeCode)
@@ -195,14 +203,14 @@ class Srt0Material:
     def __init__(self):
         self.nameOffset = 0
         self.name = ""
-        self.m = 0
-        self.unk0 = 0
+        self.m = 0              #direct textures (see enums above)
+        self.w = 0              #indirect textures (see enums above)
         self.entryOffsets = []
         self.entries = []
-        self.texEnabled = [False, False, False, False, False, False, False, False]
+        self.texEnabled = [False, False, False, False, False, False, False, False, False, False, False] #direct and indirect textures
 
     def unpack(self, data):
-        self.nameOffset, self.m, self.unk0 = Struct(">III").unpack(data[0x00:0x0C])
+        self.nameOffset, self.m, self.w = Struct(">III").unpack(data[0x00:0x0C])
         nameLength = data[self.nameOffset - 1]
         self.name = data[self.nameOffset:self.nameOffset + nameLength].decode("utf-8")
         bit = 1
@@ -217,10 +225,31 @@ class Srt0Material:
                 count += 1
             bit <<= 1
 
+        bit = 1
+        for i in range(3):
+            if bit & self.w:
+                self.texEnabled[i] = True
+                self.entryOffsets.append(Struct(">I").unpack(data[0x0C + count * 4:0x10 + count * 4])[0])
+                entry = Srt0TextureEntry()
+                entry.unpack(data[self.entryOffsets[count]:])
+                self.entries.append(entry)
+                count += 1
+            bit <<= 1
+
+        for i in range(3):
+            if bit & self.w:
+                self.texEnabled[i] = True
+                self.entryOffsets.append(Struct(">I").unpack(data[0x0C + count * 4:0x10 + count * 4])[0])
+                entry = Srt0TextureEntry()
+                entry.unpack(data[self.entryOffsets[count]:])
+                self.entries.append(entry)
+                count += 1
+            bit <<= 1
+
         print(self.nameOffset)
         print(self.name)
         print(self.m)
-        print(self.unk0)
+        print(self.w)
         print(self.entryOffsets)
         print(self.entries)
         print(self.texEnabled)
