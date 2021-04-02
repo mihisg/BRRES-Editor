@@ -218,7 +218,7 @@ class Srt0Material:
         bit = 1
         for i in range(3):
             if bit & self.w:
-                self.texEnabled[i] = True
+                self.texEnabled[8+i] = True
                 self.entryOffsets.append(Struct(">I").unpack(data[0x0C + count * 4:0x10 + count * 4])[0])
                 entry = Srt0TextureEntry()
                 entry.unpack(data[self.entryOffsets[count]:])
