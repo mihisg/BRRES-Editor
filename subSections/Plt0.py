@@ -25,8 +25,8 @@ class Plt0(SubSection):
     TAG = 'PLT0'
     EXTENSION = 'plt0'
     
-    def __init__(self, name, parent):
-        super(Plt0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Plt0, self).__init__(item, parent)
         self.palette = []
     
     def unpack(self, data):

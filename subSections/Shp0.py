@@ -20,8 +20,8 @@ class Shp0(SubSection):
     TAG = 'SHP0'
     EXTENSION = 'shp0'
 
-    def __init__(self, name, parent):
-        super(Shp0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Shp0, self).__init__(item, parent)
         self.animations = []
         self.framecount = 1
         self.loop = True

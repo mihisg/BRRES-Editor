@@ -34,8 +34,8 @@ class Tex0(SubSection):
                4: 'RGB565', 5: 'RGB5A3', 6: 'RGBA32',
                8: 'C4', 9: 'C8', 10: 'C14X2', 14: 'CMPR'}     #is C14X2 really needed -> BrawlCrate doesn't contain it
 
-    def __init__(self, name, parent):
-        super(Tex0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Tex0, self).__init__(item, parent)
         self.images = []
 
 

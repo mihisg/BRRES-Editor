@@ -54,8 +54,8 @@ class Mdl0(SubSection):
     TAG = 'MDL0'
     EXTENSION = 'mdl0'
 
-    def __init__(self, name, parent):
-        super(Mdl0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Mdl0, self).__init__(item, parent)
         self.animations = []
         self.framecount = 1
         self.loop = True

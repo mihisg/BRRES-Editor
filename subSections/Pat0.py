@@ -75,8 +75,8 @@ class Pat0(SubSection):
     TAG = 'PAT0'
     EXTENSION = 'pat0'
 
-    def __init__(self, name, parent):
-        super(Pat0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Pat0, self).__init__(item, parent)
         
     def unpack(self, data):
         super().unpackSubSectionHeader(data)

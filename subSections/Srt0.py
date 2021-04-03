@@ -10,11 +10,11 @@ class Srt0Header:
         self.animations = 0
         self.matrixMode = 0
         self.looping = False
-        
+
     def unpack(self, data):
         self.unk0, self.frames, self.animations, self.matrixMode, looping = Struct(">IHHII").unpack(data)
         self.looping = True if looping == 0x01 else False
-        
+
     def pack(self, *args):
         pass
 
@@ -33,6 +33,7 @@ Indirect0 = 0x01
 Indirect1 = 0x02
 Indirect2 = 0x04
 
+
 class KeyFrameList:
     def __init__(self):
         self.frameCount = 0
@@ -49,6 +50,7 @@ class KeyFrameList:
         print(f"KeyFrameList unknown: {self.unknown}")
         print(f"KeyFrameList frameScale: {self.frameScale}")
         print(f"KeyFrameList frames: {self.frames}")
+
 
 class Srt0TextureEntry:
     def __init__(self):
@@ -189,15 +191,17 @@ class Srt0TextureEntry:
     def pack(self):
         pass
 
+
 class Srt0Material:
     def __init__(self):
         self.nameOffset = 0
         self.name = ""
-        self.m = 0              #direct textures (see enums above)
-        self.w = 0              #indirect textures (see enums above)
+        self.m = 0  # direct textures (see enums above)
+        self.w = 0  # indirect textures (see enums above)
         self.entryOffsets = []
         self.entries = []
-        self.texEnabled = [False, False, False, False, False, False, False, False, False, False, False] #direct and indirect textures
+        self.texEnabled = [False, False, False, False, False, False, False, False, False, False,
+                           False]  # direct and indirect textures
 
     def unpack(self, data):
         self.nameOffset, self.m, self.w = Struct(">III").unpack(data[0x00:0x0C])
@@ -218,7 +222,7 @@ class Srt0Material:
         bit = 1
         for i in range(3):
             if bit & self.w:
-                self.texEnabled[8+i] = True
+                self.texEnabled[8 + i] = True
                 self.entryOffsets.append(Struct(">I").unpack(data[0x0C + count * 4:0x10 + count * 4])[0])
                 entry = Srt0TextureEntry()
                 entry.unpack(data[self.entryOffsets[count]:])
@@ -237,11 +241,12 @@ class Srt0Material:
     def pack(self, *args):
         pass
 
+
 class Srt0Section0:
     def __init__(self):
         self.indexGroup = None
         self.srt0materials = []
-        
+
     def unpack(self, data):
         self.indexGroup = BRRESIndexGroup()
         self.indexGroup.unpack(data)
@@ -249,9 +254,10 @@ class Srt0Section0:
             newMaterial = Srt0Material()
             newMaterial.unpack(data[self.indexGroup.brres_entries[i].data_offset:])
             self.srt0materials.append(newMaterial)
-        
+
     def pack(self, *args):
         pass
+
 
 class Srt0Section1:
 
@@ -264,21 +270,21 @@ class Srt0Section1:
         pass
 
 
-
 class Srt0(SubSection):
     TAG = 'SRT0'
     EXTENSION = 'srt0'
 
-    def __init__(self, name, parent):
-        super(Srt0, self).__init__(name, parent)
+    def __init__(self, item, parent):
+        super(Srt0, self).__init__(item, parent)
         self.subHeader = None
         self.section0 = None
         self.section1 = None
+        print(f"Parent: {self.parent}")
 
     def unpack(self, data):
         super().unpackSubSectionHeader(data)
         self.subHeader = Srt0Header()
-        self.subHeader.unpack(data[0x14+self.header.n*4:0x24+self.header.n*4])
+        self.subHeader.unpack(data[0x14 + self.header.n * 4:0x24 + self.header.n * 4])
         # just section0
         self.section0 = Srt0Section0()
         self.section0.unpack(data[self.header.sectionOffsets[0]:])

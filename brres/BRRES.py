@@ -78,49 +78,49 @@ class BRRES:
             length = Struct(">I").unpack(data[self.root.size + offsetToSubSection + 0x4:self.root.size + 0x8 + offsetToSubSection])[0]
             
             if name == b'MDL0':
-                subfile = Mdl0(self.folders["3DModels(NW4R)"].child(counters[0]).text(), self.folders["3DModels(NW4R)"])             # Mdl0(name, parent)
+                subfile = Mdl0(self.folders["3DModels(NW4R)"].child(counters[0]), self.folders["3DModels(NW4R)"])             # Mdl0(name, parent)
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])  # @Mihi is this actually correct? Can't check it right now 😅😜
                 self.folders["3DModels(NW4R)"].child(counters[0]).subFile = subfile
                 counters[0] += 1
                 
             elif name == b'CHR0':
-                subfile = Chr0(self.folders["AnmChr(NW4R)"].child(counters[1]).text(), self.folders["AnmChr(NW4R)"])
+                subfile = Chr0(self.folders["AnmChr(NW4R)"].child(counters[1]), self.folders["AnmChr(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["AnmChr(NW4R)"].child(counters[1]).subFile = subfile
                 counters[1] += 1
                 
             elif name == b'CLR0':
-                subfile = Clr0(self.folders["AnmClr(NW4R)"].child(counters[2]).text(), self.folders["AnmClr(NW4R)"])
+                subfile = Clr0(self.folders["AnmClr(NW4R)"].child(counters[2]), self.folders["AnmClr(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["AnmClr(NW4R)"].child(counters[2]).subFile = subfile
                 counters[2] += 1
                 
             elif name == b'PAT0':
-                subfile = Pat0(self.folders["AnmTexPat(NW4R)"].child(counters[3]).text(), self.folders["AnmTexPat(NW4R)"])
+                subfile = Pat0(self.folders["AnmTexPat(NW4R)"].child(counters[3]), self.folders["AnmTexPat(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["AnmTexPat(NW4R)"].child(counters[3]).subFile = subfile
                 counters[3] += 1
                 
             elif name == b'SCN0':
-                subfile = Scn0(self.folders["AnmScn(NW4R)"].child(counters[4]).text(), self.folders["AnmScn(NW4R)"])
+                subfile = Scn0(self.folders["AnmScn(NW4R)"].child(counters[4]), self.folders["AnmScn(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["AnmScn(NW4R)"].child(counters[4]).subFile = subfile
                 counters[4] += 1
                 
             elif name == b'SHP0':
-                subfile = Shp0(self.folders["AnmShp(NW4R)"].child(counters[5]).text(), self.folders["AnmShp(NW4R)"])
+                subfile = Shp0(self.folders["AnmShp(NW4R)"].child(counters[5]), self.folders["AnmShp(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["AnmShp(NW4R)"].child(counters[5]).subFile = subfile
                 counters[5] += 1
                 
             elif name == b'SRT0':
-                subfile = Srt0(self.folders["AnmTexSrt(NW4R)"].child(counters[6]).text(), self.folders["AnmTexSrt(NW4R)"])
+                subfile = Srt0(self.folders["AnmTexSrt(NW4R)"].child(counters[6]), self.folders["AnmTexSrt(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:])  #self.root.size + offsetToSubSection + length  ->  @Nin0 this doesn't work since the string table at the end has to be accessed
                 self.folders["AnmTexSrt(NW4R)"].child(counters[6]).subFile = subfile
                 counters[6] += 1
                 
             elif name == b'TEX0':
-                subfile = Tex0(self.folders["Textures(NW4R)"].child(counters[7]).text(), self.folders["Textures(NW4R)"])
+                subfile = Tex0(self.folders["Textures(NW4R)"].child(counters[7]), self.folders["Textures(NW4R)"])
                 #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 subfile.readStart = self.root.size + offsetToSubSection
                 subfile.readEnd = self.root.size + offsetToSubSection + length
@@ -128,13 +128,13 @@ class BRRES:
                 counters[7] += 1
                 
             elif name == b'PLT0':
-                subfile = Plt0(self.folders["Palettes(NW4R)"].child(counters[8]).text(), self.folders["Palettes(NW4R)"])
+                subfile = Plt0(self.folders["Palettes(NW4R)"].child(counters[8]), self.folders["Palettes(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["Palettes(NW4R)"].child(counters[8]).subFile = subfile
                 counters[8] += 1
                 
             else:                   #insert other subfiles before this one - also in the counters list!                         --> this won't work - there is no Unknown(NW4R) folder created in generateFoldersAndFiles ...
-                subfile = Unk0(self.folders["Unknown(NW4R)"].child(counters[-1]).text(), self.folders["Unknown(NW4R)"])
+                subfile = Unk0(self.folders["Unknown(NW4R)"].child(counters[-1]), self.folders["Unknown(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["Unknown(NW4R)"].child(counters[-1]).subFile = subfile
                 counters[-1] += 1
