@@ -96,8 +96,8 @@ class Srt0TextureEntry:
 
     def unpackScale(self, data):
         if self.scaleDefault:
-            self.xScale.append(0.0)
-            self.yScale.append(0.0)
+            self.xScale.append(1.0)
+            self.yScale.append(1.0)
             return 0
         elif self.scaleIsotropic:
             if self.xScaleFixed:

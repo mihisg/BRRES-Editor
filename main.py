@@ -9,10 +9,10 @@ if __name__ == '__main__':
     with open("bgB_7801-Srt0.brres", 'rb') as f:
         brres = BRRES()
         brres.unpack(f.read())
-        #brres.saveAllImagesAsPng()
+        brres.saveAllImagesAsPng()
     
     app = QApplication(sys.argv)
     window = QMainWindow()
-    window.setCentralWidget(BRRESTreeView())
+    window.setCentralWidget(BRRESTreeView(brres.model))
     window.show()
     sys.exit(app.exec_())
