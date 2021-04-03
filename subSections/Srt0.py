@@ -1,6 +1,9 @@
+from PyQt5.QtGui import QStandardItem
+
 from subSections.SubSection import SubSection
 from struct import Struct
 from brres.BRRESIndexGroup import BRRESIndexGroup
+import brres
 
 
 class Srt0Header:
@@ -193,7 +196,9 @@ class Srt0TextureEntry:
 
 
 class Srt0Material:
-    def __init__(self):
+    def __init__(self, parent):
+        self.item = None
+        self.parent = parent
         self.nameOffset = 0
         self.name = ""
         self.m = 0  # direct textures (see enums above)
@@ -207,6 +212,7 @@ class Srt0Material:
         self.nameOffset, self.m, self.w = Struct(">III").unpack(data[0x00:0x0C])
         nameLength = data[self.nameOffset - 1]
         self.name = data[self.nameOffset:self.nameOffset + nameLength].decode("utf-8")
+        self.item = brres.BRRES.newItem(False, self.name)
         bit = 1
         count = 0
         for i in range(8):
@@ -216,6 +222,7 @@ class Srt0Material:
                 entry = Srt0TextureEntry()
                 entry.unpack(data[self.entryOffsets[count]:])
                 self.entries.append(entry)
+                self.item.appendRow(brres.BRRES.newItem(False, f"Texture{i}"))
                 count += 1
             bit <<= 1
 
@@ -227,6 +234,7 @@ class Srt0Material:
                 entry = Srt0TextureEntry()
                 entry.unpack(data[self.entryOffsets[count]:])
                 self.entries.append(entry)
+                self.item.appendRow(brres.BRRES.newItem(False, f"IndTexture{i}"))
                 count += 1
             bit <<= 1
 
@@ -245,15 +253,15 @@ class Srt0Material:
 class Srt0Section0:
     def __init__(self):
         self.indexGroup = None
-        self.srt0materials = []
 
-    def unpack(self, data):
+    def unpack(self, data, srt):
         self.indexGroup = BRRESIndexGroup()
         self.indexGroup.unpack(data)
         for i in range(0, self.indexGroup.n_entries):
-            newMaterial = Srt0Material()
+            newMaterial = Srt0Material(srt.item)
             newMaterial.unpack(data[self.indexGroup.brres_entries[i].data_offset:])
-            self.srt0materials.append(newMaterial)
+            srt.matAnimations.append(newMaterial)
+            srt.item.appendRow(newMaterial.item)
 
     def pack(self, *args):
         pass
@@ -276,18 +284,17 @@ class Srt0(SubSection):
 
     def __init__(self, item, parent):
         super(Srt0, self).__init__(item, parent)
-        self.subHeader = None
+        self.subHeader = Srt0Header()
+        self.matAnimations = []
         self.section0 = None
         self.section1 = None
-        print(f"Parent: {self.parent}")
 
     def unpack(self, data):
         super().unpackSubSectionHeader(data)
-        self.subHeader = Srt0Header()
         self.subHeader.unpack(data[0x14 + self.header.n * 4:0x24 + self.header.n * 4])
         # just section0
         self.section0 = Srt0Section0()
-        self.section0.unpack(data[self.header.sectionOffsets[0]:])
+        self.section0.unpack(data[self.header.sectionOffsets[0]:], self)
         if self.header.n == 2:
             # section0 and section1
             self.section1 = Srt0Section1()

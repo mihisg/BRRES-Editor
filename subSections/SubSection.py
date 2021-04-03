@@ -28,7 +28,7 @@ class SubSection:
 
     def unpackSubSectionHeader(self, data):
         header = SubSection.SubSectionHeader()
-        header.magic, header.size, header.version, header.outerOffset = Struct(">4sIII").unpack(data[0x0:0x10])
+        header.magic, header.size, header.version, header.outerOffset = Struct(">4sIIi").unpack(data[0x0:0x10])
 
         n = self.getNumberOfSections(header.magic, header.version)
         for i in range(0, n):
@@ -43,7 +43,6 @@ class SubSection:
         # print(self.header.magic)
         # print(self.header.size)
         # print(self.header.version)
-        # print(self.header.outerOffset)
         # print(self.header.sectionOffsets)
         # print(self.header.stringOffset)
 

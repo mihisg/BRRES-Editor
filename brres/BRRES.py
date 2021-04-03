@@ -12,6 +12,16 @@ from subSections.Plt0 import Plt0
 from subSections.Unk0 import Unk0
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
+def newItem(isFolder, name, data=0):
+    # title = os.path.basename(path)
+    item = QStandardItem()
+    # icon_path = FILE_ICON_PATH
+    # if isFolder:
+    #    icon_path = DIR_ICON_PATH
+    # icon = QtGui.QIcon(icon_path)
+    item.setText(name)
+    # item.setIcon(icon)
+    return item
 
 class BRRES:
     TAG = b'bres'
@@ -45,25 +55,12 @@ class BRRES:
             zero = Struct(">s").unpack(data[0x10 + self.root.size + offsetToFirstSubSection:0x10 + self.root.size + 0x1 + offsetToFirstSubSection])[0]
         return offsetToFirstSubSection
 
-
-    def newItem(self, isFolder, name, data = 0):
-        #title = os.path.basename(path)
-        item = QStandardItem()
-        #icon_path = FILE_ICON_PATH
-        #if isFolder:
-        #    icon_path = DIR_ICON_PATH
-        #icon = QtGui.QIcon(icon_path)
-        item.setText(name)
-        #item.setIcon(icon)
-        return item
-
-
     def generateFoldersAndFiles(self):
         for entry in range(0, self.root.first_group.n_entries):
-            newParent = self.newItem(True, self.root.first_group.brres_entries[entry].name)
+            newParent = newItem(True, self.root.first_group.brres_entries[entry].name)
             self.model.appendRow(newParent)
             for i in self.root.subGroups[entry].brres_entries:
-                newSubFile = self.newItem(False, i.name)
+                newSubFile = newItem(False, i.name)
                 newSubFile.subFile = 0
                 newParent.appendRow(newSubFile)
             
@@ -120,6 +117,7 @@ class BRRES:
                 counters[6] += 1
                 
             elif name == b'TEX0':
+                pass
                 subfile = Tex0(self.folders["Textures(NW4R)"].child(counters[7]), self.folders["Textures(NW4R)"])
                 #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 subfile.readStart = self.root.size + offsetToSubSection
@@ -128,6 +126,7 @@ class BRRES:
                 counters[7] += 1
                 
             elif name == b'PLT0':
+                pass
                 subfile = Plt0(self.folders["Palettes(NW4R)"].child(counters[8]), self.folders["Palettes(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["Palettes(NW4R)"].child(counters[8]).subFile = subfile
