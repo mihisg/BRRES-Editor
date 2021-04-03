@@ -46,13 +46,19 @@ class KeyFrameList:
 
     def unpack(self, data):
         self.frameCount, self.unknown, self.frameScale = Struct(">HHf").unpack(data[0:8])
+        print(data)
+        print(len(data))
         for i in range(self.frameCount):
             tangent, value, index = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
+            print(i)
             self.frames.append([tangent, value, index])
         print(f"KeyFrameList frameCount: {self.frameCount}")
         print(f"KeyFrameList unknown: {self.unknown}")
         print(f"KeyFrameList frameScale: {self.frameScale}")
         print(f"KeyFrameList frames: {self.frames}")
+
+    def lenght(self):
+        return 8 + 12 * self.frameCount
 
 
 class Srt0TextureEntry:

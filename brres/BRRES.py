@@ -117,7 +117,6 @@ class BRRES:
                 counters[6] += 1
                 
             elif name == b'TEX0':
-                pass
                 subfile = Tex0(self.folders["Textures(NW4R)"].child(counters[7]), self.folders["Textures(NW4R)"])
                 #subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 subfile.readStart = self.root.size + offsetToSubSection
@@ -126,7 +125,6 @@ class BRRES:
                 counters[7] += 1
                 
             elif name == b'PLT0':
-                pass
                 subfile = Plt0(self.folders["Palettes(NW4R)"].child(counters[8]), self.folders["Palettes(NW4R)"])
                 subfile.unpack(data[self.root.size + offsetToSubSection:self.root.size + offsetToSubSection + length])
                 self.folders["Palettes(NW4R)"].child(counters[8]).subFile = subfile
