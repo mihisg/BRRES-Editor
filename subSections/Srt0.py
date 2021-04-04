@@ -46,21 +46,17 @@ class KeyFrameList:
 
     def unpack(self, data):
         self.frameCount, self.unknown, self.frameScale = Struct(">HHf").unpack(data[0:8])
-        print(data)
-        print(len(data))
-        print(f"KeyFrameList frameCount: {self.frameCount}")
-        print(f"KeyFrameList unknown: {self.unknown}")
-        print(f"KeyFrameList frameScale: {self.frameScale}")
+        #print(data)
+        #print(len(data))
+        #print(f"KeyFrameList frameCount: {self.frameCount}")
+        #print(f"KeyFrameList unknown: {self.unknown}")
+        #print('FrameScale: {} i v d'.format(self.frameScale))
         
         for i in range(self.frameCount):
-            tangent, value, index = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
-            print(i)
-            self.frames.append([tangent, value, index])
-            print(f"KeyFrameList index: {index}")
-        print(f"KeyFrameList frameCount: {self.frameCount}")
-        print(f"KeyFrameList unknown: {self.unknown}")
-        print(f"KeyFrameList frameScale: {self.frameScale}")
-        print(f"KeyFrameList frames: {self.frames}")
+            index, value, delta = Struct("> fff").unpack(data[0x8 + i * 0xC: 0x14 + i * 0xC])
+            #print('({},{},{}), '.format(index, value, delta))
+            self.frames.append([index, value, delta])
+        #print(f"KeyFrameList frames: {self.frames}")
 
     def lenght(self):
         return 8 + 12 * self.frameCount
@@ -139,7 +135,7 @@ class Srt0TextureEntry:
                 self.yScale.append(scale)
             else:
                 scalePointer = Struct("> I").unpack(data[0x4:0x8])[0]
-                keyFrameList = self.unpackKeyFrameList(data[scalePointer:])
+                keyFrameList = self.unpackKeyFrameList(data[0x4 + scalePointer:])
                 self.yScale.append(keyFrameList)
             return 0x8
 
@@ -174,7 +170,7 @@ class Srt0TextureEntry:
                 self.yTranslation.append(yTrans)
             else:
                 transPointer = Struct(">I").unpack(data[0x4:0x8])[0]
-                keyFrameList = self.unpackKeyFrameList(data[transPointer:])
+                keyFrameList = self.unpackKeyFrameList(data[0x4 + transPointer:])
                 self.yTranslation.append(keyFrameList)
 
     def unpack(self, data):
@@ -184,7 +180,7 @@ class Srt0TextureEntry:
         rotationOffset = self.unpackRotation(data[0x4 + scaleOffset:])
         self.unpackTranslation(data[0x4 + scaleOffset + rotationOffset:])
 
-        print(f"Texture Entry animationCode: {self.animationTypeCode}")
+        """print(f"Texture Entry animationCode: {self.animationTypeCode}")
         print(f"Texture Entry unknownBit: {self.unknownBit}")
         print(f"Texture Entry scaleDefault: {self.scaleDefault}")
         print(f"Texture Entry rotationDefault: {self.rotationDefault}")
@@ -200,7 +196,7 @@ class Srt0TextureEntry:
         print(f"Texture Entry yScale: {self.yScale}")
         print(f"Texture Entry rotation: {self.rotation}")
         print(f"Texture Entry xTranslation: {self.xTranslation}")
-        print(f"Texture Entry yTranslation: {self.yTranslation}")
+        print(f"Texture Entry yTranslation: {self.yTranslation}")"""
 
     def pack(self):
         pass
@@ -249,13 +245,13 @@ class Srt0Material:
                 count += 1
             bit <<= 1
 
-        print(f"Material name offset: ${self.nameOffset}")
+        """print(f"Material name offset: ${self.nameOffset}")
         print(f"Material name: ${self.name}")
         print(f"Material texture count: ${self.m}")
         print(f"Material ind texture count: ${self.w}")
         print(f"Material entry offsets: ${self.entryOffsets}")
         print(f"Material entries: ${self.entries}")
-        print(f"Material texEnabled: ${self.texEnabled}")
+        print(f"Material texEnabled: ${self.texEnabled}")"""
 
     def pack(self, *args):
         pass
