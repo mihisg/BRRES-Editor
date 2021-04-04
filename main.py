@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 if __name__ == '__main__':
     import sys
 
-    with open("test/bgA_3102.brres", 'rb') as f:
+    with open("CMPR.brres", 'rb') as f:
         brres = BRRES()
         brres.unpack(f.read())
         brres.saveAllImagesAsPng()
